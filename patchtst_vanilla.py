@@ -1,11 +1,9 @@
 import torch
+import time
 import pytorch_lightning as pl
 import torch.nn.functional as F
 
-from transformers import (
-    PatchTSTConfig,
-    PatchTSTForPrediction
-)
+from transformers import PatchTSTConfig, PatchTSTForPrediction
 
 class PatchTSTVanilla(pl.LightningModule):
     def __init__(self, model_config):
@@ -37,14 +35,21 @@ class PatchTSTVanilla(pl.LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = F.mse_loss(y_hat, y)
-        self.log('train_loss', loss)
+        self.log('train_loss', loss, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
         val_loss = F.mse_loss(y_hat, y)
-        self.log('val_loss', val_loss)
+        self.log('val_loss', val_loss, on_epoch=True, prog_bar=True, logger=True)
+
+    def on_train_batch_start(self, batch, batch_idx, dataloader_idx):
+        self.batch_start_time = time.time()
+
+    def on_train_batch_end(self, outputs, batch, batch_idx, dataloader_idx):
+        batch_time = time.time() - self.batch_start_time
+        self.log('batch_time', batch_time, on_step=True, logger=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=0.001)

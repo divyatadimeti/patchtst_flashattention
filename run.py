@@ -56,7 +56,7 @@ def main(args):
 
     # Set up the trainer
     trainer = pl.Trainer(
-        max_epochs=config["training"]["epochs"],
+        max_epochs=train_config["epochs"],
         logger=logger,
         callbacks=[early_stop_callback, checkpoint_callback, lr_monitor],
         gpus=1,
