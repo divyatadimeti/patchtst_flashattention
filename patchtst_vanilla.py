@@ -43,6 +43,12 @@ class PatchTSTVanilla(pl.LightningModule):
         y_hat = self(x)
         val_loss = F.mse_loss(y_hat, y)
         self.log('val_loss', val_loss, on_epoch=True, prog_bar=True, logger=True)
+    
+    def test_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        val_loss = F.mse_loss(y_hat, y)
+        self.log('test_loss', val_loss, on_epoch=True, prog_bar=True, logger=True)
 
     def on_train_batch_start(self, batch, batch_idx, dataloader_idx):
         self.batch_start_time = time.time()

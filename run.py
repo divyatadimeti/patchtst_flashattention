@@ -62,7 +62,11 @@ def main(args):
         gpus=1,
     )
 
+    # Train the model
     trainer.fit(model, train_dataloader, val_dataloader)
+
+    # Test the model
+    trainer.test(model, test_dataloaders=test_dataloader)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Training PatchTST vanilla and FlashAttention2 models for benchmarking and profiling")
