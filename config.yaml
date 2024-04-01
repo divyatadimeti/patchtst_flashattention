@@ -23,4 +23,3 @@ logging:
   wandb_project: "patchtst-flashattention"
   wandb_entity: "patchtst-flashattention"
   wandb_run_name: "project-test"
-

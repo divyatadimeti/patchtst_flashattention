@@ -35,3 +35,4 @@ if model_config["model_type"] == "vanilla":
     model = get_vanilla_patchtst(model_config)
 else:
     pass
+
