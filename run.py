@@ -8,7 +8,11 @@ args = parser.parse_args()
 
 config = yaml.safe_load(open(args.config))
 
-wandb.init(project=config["logging"]["wandb_project"], entity=config["logging"]["wandb_entity"])
+run = wandb.init(project=config["logging"]["wandb_project"], 
+           entity=config["logging"]["wandb_entity"],
+           name=config["logging"]["wandb_run_name"])
+assert run is wandb.run
+
 
 
 

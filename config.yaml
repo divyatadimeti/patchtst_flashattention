@@ -4,5 +4,7 @@ training:
   batch_size: 32
   learning_rate: 0.001
 logging:
-  wandb_project:  
-  wandb_entity:
+  wandb_project: "patchtst-flashattention"
+  wandb_entity: "patchtst-flashattention"
+  wandb_run_name: "project-test"
+
