@@ -1,6 +1,17 @@
-# data:
+data:
+  ETTh1:
+    data_path: f"https://raw.githubusercontent.com/zhouhaoyi/ETDataset/main/ETT-small/ETTh1.csv"
+  ETTm1:
+    data_path: f"https://raw.githubusercontent.com/zhouhaoyi/ETDataset/main/ETT-small/ETTm1.csv"
+  # Traffic:
+model:
+  context_length: 512
+  forecast_horizon: 96
+  patch_length: 12
 training:
-  epochs: 10
+  dataset: "ETTh1"
+  num_workers: 2
+  epochs: 100
   batch_size: 32
   learning_rate: 0.001
 logging:

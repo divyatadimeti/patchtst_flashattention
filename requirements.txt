@@ -1,2 +1,5 @@
 wandb
 pyyaml
+transformers
+pandas
+numpy
