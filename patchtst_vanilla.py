@@ -13,7 +13,7 @@ class PatchTSTVanilla(pl.LightningModule):
                             patch_length=model_config["patch_length"],
                             num_input_channels=model_config["num_input_channels"],
                             patch_stride=model_config["patch_length"],
-                            prediction_length=model_config["prediction_length"],
+                            prediction_length=model_config["forecast_horizon"],
                             d_model=model_config["d_model"],
                             num_attention_heads=model_config["num_attention_heads"],
                             num_hidden_layers=model_config["num_hidden_layers"],

@@ -41,7 +41,7 @@ def main(args):
         pass
 
     # Load the appropriate model (either Vanilla or FlashAttention2)
-    if model_config["model_type"] == "vanilla":
+    if config["model_type"] == "vanilla":
         model = PatchTSTVanilla(model_config)
     else:
         pass
@@ -56,10 +56,11 @@ def main(args):
 
     # Set up the trainer
     trainer = pl.Trainer(
+        accelerator="gpu",
+        devices=1,
         max_epochs=train_config["epochs"],
         logger=logger,
         callbacks=[early_stop_callback, checkpoint_callback, lr_monitor],
-        gpus=1,
     )
 
     # Train the model

@@ -1,6 +1,6 @@
 data:
   ETTh1:
-    data_path: f"https://raw.githubusercontent.com/zhouhaoyi/ETDataset/main/ETT-small/ETTh1.csv"
+    data_path: "data/ETTh1.csv"
   ETTm1:
     data_path: f"https://raw.githubusercontent.com/zhouhaoyi/ETDataset/main/ETT-small/ETTm1.csv"
   # Traffic:
