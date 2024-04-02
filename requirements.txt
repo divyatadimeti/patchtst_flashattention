@@ -3,3 +3,4 @@ pyyaml
 transformers
 pandas
 numpy
+pytorch_lightning
