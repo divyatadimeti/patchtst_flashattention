@@ -1,10 +1,20 @@
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 
 from tsfm_public.toolkit.dataset import ForecastDFDataset
 from tsfm_public.toolkit.time_series_preprocessor import TimeSeriesPreprocessor
 from tsfm_public.toolkit.util import select_by_index
+
+class ETTDataset(Dataset):
+    def __init__(self, data):
+        self.data = data
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        return self.data[index]['past_values'], self.data[index]['future_values']
 
 def get_ETT_datasets(data_path, context_length, forecast_horizon):
     timestamp_column = "date"
@@ -82,6 +92,9 @@ def get_ETT_dataloaders(data_config,
                         num_workers=2):
     data_path = data_config["data_path"]
     train_dataset, valid_dataset, test_dataset = get_ETT_datasets(data_path, context_length, forecast_horizon)
+    train_dataset = ETTDataset(train_dataset)
+    valid_dataset = ETTDataset(valid_dataset)
+    test_dataset = ETTDataset(test_dataset)
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=batch_size,
