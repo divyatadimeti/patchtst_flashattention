@@ -4,7 +4,7 @@ import wandb
 import pytorch_lightning as pl
 
 from dataloader import get_ETT_dataloaders
-from patchtst_model import PatchTSTVanilla
+from patchtst_model import PatchTST
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, LearningRateMonitor
 
@@ -42,13 +42,13 @@ def main(args):
 
     # Load the appropriate model (either Vanilla or FlashAttention2)
     if model_config["attn_type"] == "vanilla":
-        model = PatchTSTVanilla(model_config)
+        model = PatchTST(model_config)
     else:
-        pass
+        model = PatchTST(model_config)
 
     # Set up callbacks for early stopping, model checkpointing and learning rate scheduling
     callbacks = []
-    if train_log["early_stopping"]:
+    if train_config["early_stopping"]:
         early_stop_callback = EarlyStopping(monitor="val_loss", patience=train_config["patience"])
         callbacks.append(early_stop_callback)
 
