@@ -19,9 +19,9 @@ training:
   epochs: 100
   batch_size: 32
   learning_rate: 0.0001
-  patience: 5
+  patience: 30
+  early_stopping: True
 logging:
   wandb_project: "patchtst-flashattention"
   wandb_entity: "patchtst-flashattention"
-  wandb_run_name: "project-test"
   checkpoint_path: "./checkpoints"
