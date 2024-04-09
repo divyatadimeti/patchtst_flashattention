@@ -4,7 +4,6 @@ data:
   ETTm1:
     data_path: f"https://raw.githubusercontent.com/zhouhaoyi/ETDataset/main/ETT-small/ETTm1.csv"
   # Traffic:
-model_type: "vanilla"
 model:
   context_length: 512
   num_input_channels: 7
@@ -13,6 +12,7 @@ model:
   d_model: 128
   num_attention_heads: 16
   num_hidden_layers: 3
+  attn_type: "vanilla" 
 training:
   dataset: "ETTh1"
   num_workers: 2

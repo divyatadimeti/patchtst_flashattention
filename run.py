@@ -4,7 +4,7 @@ import wandb
 import pytorch_lightning as pl
 
 from dataloader import get_ETT_dataloaders
-from patchtst_vanilla import PatchTSTVanilla
+from patchtst_model import PatchTSTVanilla
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, LearningRateMonitor
 
@@ -41,7 +41,7 @@ def main(args):
         pass
 
     # Load the appropriate model (either Vanilla or FlashAttention2)
-    if config["model_type"] == "vanilla":
+    if model_config["attn_type"] == "vanilla":
         model = PatchTSTVanilla(model_config)
     else:
         pass
