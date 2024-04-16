@@ -4,7 +4,7 @@ import pytorch_lightning as pl
 import torch.nn.functional as F
 
 from transformers import PatchTSTConfig, PatchTSTForPrediction
-from patchtst_flash import PatchTSTFlashAttention2
+from patchtst_flash import PatchTSTFlashConfig, PatchTSTFlashAttention2
 
 class PatchTST(pl.LightningModule):
     def __init__(self, model_config):
@@ -17,7 +17,7 @@ class PatchTST(pl.LightningModule):
                                     patch_stride=model_config["patch_length"],
                                     prediction_length=model_config["forecast_horizon"],
                                     d_model=model_config["d_model"],
-                                    num_attention_heads=model_config["num_attention_heads"],
+                                    num_attention_heads=model_config["num_heads"],
                                     num_hidden_layers=model_config["num_hidden_layers"],
                                     ffn_dim=512,
                                     dropout=0.2,
@@ -30,7 +30,8 @@ class PatchTST(pl.LightningModule):
                                     norm_type="batchnorm")
             self.model = PatchTSTForPrediction(config=config)
         else:
-            config = PatchTSTConfig(causal=True, #TODO: check whether this should be true
+            config = PatchTSTFlashConfig(causal=True,
+                                    num_key_value_heads=config["num_key_value_heads"],
                                     do_mask_input=False,
                                     context_length=model_config["context_length"],
                                     patch_length=model_config["patch_length"],
@@ -38,7 +39,7 @@ class PatchTST(pl.LightningModule):
                                     patch_stride=model_config["patch_length"],
                                     prediction_length=model_config["forecast_horizon"],
                                     d_model=model_config["d_model"],
-                                    num_attention_heads=model_config["num_attention_heads"],
+                                    num_attention_heads=model_config["num_heads"],
                                     num_hidden_layers=model_config["num_hidden_layers"],
                                     ffn_dim=512,
                                     dropout=0.2,
@@ -48,7 +49,8 @@ class PatchTST(pl.LightningModule):
                                     scaling="std",
                                     loss="mse",
                                     pre_norm=True,
-                                    norm_type="batchnorm")
+                                    norm_type="batchnorm",
+                                    )
             self.model = PatchTSTFlashAttention2(config=config)
 
     def forward(self, x):

@@ -12,15 +12,21 @@ from transformers.models.llama.modeling_llama import _get_unpad_data
 class PatchTSTFlashConfig(PatchTSTConfig):
     def __init__(self, 
                  causal,
+                 num_key_value_heads,
                  **kwargs
     ):
         super().__init__(**kwargs)
         self.causal = causal
+        self.num_key_value_heads = num_key_value_heads
 
 class FlashAttention2(PatchTSTAttention):
-    def __init__(self, causal, **kwargs):
+    def __init__(self, 
+                 causal, 
+                 num_key_value_heads,
+                 **kwargs):
         super().__init__(**kwargs)
         self.causal = causal
+        self.num_key_value_heads = num_key_value_heads
     
     def _rotate_half(self, x):
         x1 = x[..., : x.shape[-1] // 2]
@@ -210,6 +216,7 @@ class PatchTSTFlashAttention2(PatchTSTForPrediction):
         for encoder_layer in self.model.encoder.layers:
             encoder_layer.self_attn = FlashAttention2(
                 causal=config.causal,
+                num_key_value_heads=config.num_key_value_heads,
                 embed_dim=config.d_model,
                 num_heads=config.num_attention_heads,
                 dropout=config.attention_dropout
