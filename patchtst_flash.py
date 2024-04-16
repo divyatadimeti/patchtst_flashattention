@@ -2,10 +2,9 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-# from ast import Tuple
-# from pyparsing import Optional
 from typing import Optional, Tuple
-from transformers import PatchTSTForPrediction, PatchTSTConfig, PatchTSTAttention
+from transformers import PatchTSTForPrediction, PatchTSTConfig
+from transformers.models.patchtst.modeling_patchtst import PatchTSTAttention
 from flash_attn import flash_attn_func, flash_attn_varlen_func
 from flash_attn.bert_padding import index_first_axis, pad_input, unpad_input
 from transformers.models.llama.modeling_llama import _get_unpad_data
