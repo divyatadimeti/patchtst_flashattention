@@ -31,7 +31,7 @@ class PatchTST(pl.LightningModule):
             self.model = PatchTSTForPrediction(config=config)
         else:
             config = PatchTSTFlashConfig(causal=True,
-                                    num_key_value_heads=config["num_key_value_heads"],
+                                    num_key_value_heads=model_config["num_key_value_heads"],
                                     do_mask_input=False,
                                     context_length=model_config["context_length"],
                                     patch_length=model_config["patch_length"],

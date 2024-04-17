@@ -24,6 +24,11 @@ def main(args):
             name=args.run_name)
     assert run is wandb.run
 
+    wandb.config.update(model_config)
+    wandb.config.update(train_config)
+    wandb.config.update(data_config)
+    wandb.config.update(log_config)
+
     logger = WandbLogger(project=log_config["wandb_project"],
                          entity=log_config["wandb_entity"],
                          name=args.run_name)

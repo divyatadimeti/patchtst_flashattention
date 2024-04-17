@@ -5,4 +5,4 @@ pandas
 numpy
 pytorch_lightning
 typing
-torch==1.12.1+cu113
+torch

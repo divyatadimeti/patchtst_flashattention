@@ -96,21 +96,28 @@ class FlashAttention2(PatchTSTAttention):
         output_attentions: bool = False,
         position_ids: Optional[torch.LongTensor] = None
     ):
-        batch_size, query_length, _ = hidden_states.size()
-        
+        batch_size, query_length, _ = hidden_states.shape
         query_states = self.q_proj(hidden_states)
         key_states = self.k_proj(hidden_states)
         value_states = self.v_proj(hidden_states)
 
-        query_states = query_states.view(batch_size, query_length, self.num_heads, self.head_dim).transpose(1, 2)
-        key_states = key_states.view(batch_size, query_length, self.num_key_value_heads, self.head_dim).transpose(1, 2)
-        value_states = value_states.view(batch_size, query_length, self.num_key_value_heads, self.head_dim).transpose(1, 2)
+        if self.qk_layernorm:
+            query_states = self.q_layernorm(query_states)
+            key_states = self.k_layernorm(key_states)
+
+        # Flash attention requires the input to have the shape
+        # batch_size x seq_length x head_dim x hidden_dim
+        # therefore we just need to keep the original shape
+        query_states = query_states.view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+        key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
+        value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
 
         kv_seq_len = key_states.shape[-2]
         if past_key_value is not None:
             kv_seq_len += past_key_value.get_usable_length(kv_seq_len, self.layer_idx)
         cos, sin = self.rotary_emb(value_states, seq_len=kv_seq_len)
 
+        # Partial rotary embedding
         query_rot, query_pass = (
             query_states[..., : self.rotary_emb.dim],
             query_states[..., self.rotary_emb.dim :],
@@ -119,9 +126,10 @@ class FlashAttention2(PatchTSTAttention):
             key_states[..., : self.rotary_emb.dim],
             key_states[..., self.rotary_emb.dim :],
         )
+        # [batch_size, seq_length, num_heads, head_dim // config.partial_rotary_factor]
+        query_rot, key_rot = apply_rotary_pos_emb(query_rot, key_rot, cos, sin, position_ids)
 
-        query_rot, key_rot = self._apply_rotary_pos_emb(query_rot, key_rot, cos, sin, position_ids)
-
+        # [batch_size, seq_length, num_heads, head_dim]
         query_states = torch.cat((query_rot, query_pass), dim=-1)
         key_states = torch.cat((key_rot, key_pass), dim=-1)
 
@@ -129,40 +137,44 @@ class FlashAttention2(PatchTSTAttention):
             cache_kwargs = {"sin": sin, "cos": cos, "partial_rotation_size": self.rotary_emb.dim}
             key_states, value_states = past_key_value.update(key_states, value_states, self.layer_idx, cache_kwargs)
 
-        key_states = self.repeat_kv(key_states, self.num_key_value_groups)
-        value_states = self.repeat_kv(value_states, self.num_key_value_groups)
+        # TODO: These transpose are quite inefficient but Flash Attention requires the layout [batch_size, sequence_length, num_heads, head_dim]. We would need to refactor the KV cache
+        # to be able to avoid many of these transpose/reshape/view.
+        query_states = query_states.transpose(1, 2)
+        key_states = key_states.transpose(1, 2)
+        value_states = value_states.transpose(1, 2)
 
-        attn_weights = torch.matmul(
-            query_states.to(torch.float32), key_states.to(torch.float32).transpose(2, 3)
-        ) / np.sqrt(self.head_dim)
+        attn_dropout = self.attention_dropout if self.training else 0.0
 
-        if attn_weights.size() != (batch_size, self.num_heads, query_length, kv_seq_len):
-            raise ValueError(
-                f"Attention weights should be of size {(batch_size, self.num_heads, query_length, kv_seq_len)}, but is"
-                f" {attn_weights.size()}"
+        # In PEFT, usually we cast the layer norms in float32 for training stability reasons
+        # therefore the input hidden states gets silently casted in float32. Hence, we need
+        # cast them back in the correct dtype just to be sure everything works as expected.
+        # This might slowdown training & inference so it is recommended to not cast the LayerNorms
+        # in fp32.
+
+        if query_states.dtype == torch.float32:
+            if torch.is_autocast_enabled():
+                target_dtype = torch.get_autocast_gpu_dtype()
+            # Handle the case where the model is quantized
+            elif hasattr(self.config, "_pre_quantization_dtype"):
+                target_dtype = self.config._pre_quantization_dtype
+            else:
+                target_dtype = self.q_proj.weight.dtype
+
+            logger.warning_once(
+                f"The input hidden states seems to be silently casted in float32, this might be related to"
+                f" the fact you have upcasted embedding or layer norm layers in float32. We will cast back the input in"
+                f" {target_dtype}."
             )
 
-        if attention_mask is not None:
-            if attention_mask.size() != (batch_size, 1, query_length, kv_seq_len):
-                raise ValueError(
-                    f"Attention mask should be of size {(batch_size, 1, query_length, kv_seq_len)}, but is {attention_mask.size()}"
-                )
-            attn_weights = attn_weights + attention_mask
+            query_states = query_states.to(target_dtype)
+            key_states = key_states.to(target_dtype)
+            value_states = value_states.to(target_dtype)
 
-        attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(value_states.dtype)
-        attn_weights = nn.functional.dropout(attn_weights, p=self.attention_dropout, training=self.training)
+        attn_output = self._flash_attention_forward(
+            query_states, key_states, value_states, attention_mask, q_len, dropout=attn_dropout, softmax_scale=None
+        )
 
-        attn_output = torch.matmul(attn_weights, value_states)
-
-        if attn_output.size() != (batch_size, self.num_heads, query_length, self.head_dim):
-            raise ValueError(
-                f"`attn_output` should be of size {(batch_size, self.num_heads, query_length, self.head_dim)}, but is"
-                f" {attn_output.size()}"
-            )
-
-        attn_output = attn_output.transpose(1, 2).contiguous()
-        attn_output = attn_output.reshape(batch_size, query_length, self.hidden_size)
-
+        attn_output = attn_output.reshape(bsz, q_len, self.hidden_size).contiguous()
         attn_output = self.dense(attn_output)
 
         if not output_attentions:
@@ -208,7 +220,7 @@ class FlashAttention2(PatchTSTAttention):
                 query_states, key_states, value_states, dropout, softmax_scale=softmax_scale, causal=causal
             )
 
-        return attn_output 
+        return attn_output
 
 class PatchTSTFlashAttention2(PatchTSTForPrediction):
     def __init__(self, config: PatchTSTConfig):
