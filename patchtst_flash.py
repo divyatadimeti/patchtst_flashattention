@@ -101,10 +101,6 @@ class FlashAttention2(PatchTSTAttention):
         key_states = self.k_proj(hidden_states)
         value_states = self.v_proj(hidden_states)
 
-        if self.qk_layernorm:
-            query_states = self.q_layernorm(query_states)
-            key_states = self.k_layernorm(key_states)
-
         query_states = query_states.view(batch_size, query_length, self.num_heads, self.head_dim).transpose(1, 2)
         key_states = key_states.view(batch_size, query_length, self.num_key_value_heads, self.head_dim).transpose(1, 2)
         value_states = value_states.view(batch_size, query_length, self.num_key_value_heads, self.head_dim).transpose(1, 2)
@@ -134,7 +130,7 @@ class FlashAttention2(PatchTSTAttention):
             key_states = key_states.to(target_dtype)
             value_states = value_states.to(target_dtype)
 
-        attn_output = self._flash_attention_forward(
+        attn_output = self._flashattention_forward(
             query_states, key_states, value_states, attention_mask, query_length, dropout=attn_dropout, softmax_scale=None
         )
 
@@ -181,7 +177,7 @@ class FlashAttention2(PatchTSTAttention):
             attn_output = pad_input(attn_output_unpad, indices_q, batch_size, query_length)
         else:
             attn_output = flash_attn_func(
-                query_states, key_states, value_states, dropout, softmax_scale=softmax_scale, causal=causal
+                query_states, key_states, value_states, dropout, softmax_scale=softmax_scale, causal=self.causal
             )
 
         return attn_output
