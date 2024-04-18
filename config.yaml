@@ -23,6 +23,7 @@ training:
   patience: 30
   early_stopping: True
 logging:
+  use_wandb: False
   wandb_project: "patchtst-flashattention"
   wandb_entity: "patchtst-flashattention"
   checkpoint_path: "./checkpoints"

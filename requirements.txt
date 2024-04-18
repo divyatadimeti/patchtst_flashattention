@@ -1,8 +1,11 @@
 wandb
+packaging
+ninja
 pyyaml
 transformers
 pandas
 numpy
 pytorch_lightning
 typing
-torch
+torch>=11.6
+flash-attn --no-build-isolation
