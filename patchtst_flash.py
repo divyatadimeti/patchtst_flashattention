@@ -134,7 +134,7 @@ class FlashAttention2(PatchTSTAttention):
             query_states, key_states, value_states, attention_mask, query_length, dropout=attn_dropout, softmax_scale=None
         )
 
-        attn_output = attn_output.reshape(batch_size, query_length, self.hidden_size).contiguous()
+        attn_output = attn_output.reshape(batch_size, query_length, -1).contiguous()
         attn_output = self.dense(attn_output)
 
         if not output_attentions:
