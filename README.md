@@ -22,6 +22,12 @@ cd tsfm
 pip install ".[notebooks]"
 ```
 
+**Install FlashAttention2**
+We use the official code from the FlashAttention repository to run PatchTST with FlashAttention2. It can be installed using the below command:
+```
+pip install -U flash-attn --no-build-isolation
+```
+
 ### Running the Code
 **Config file**
 The configuration in `config.yaml` has been provided as a default to run PatchTST with Vanilla and FlashAttention. To change which model is being used, ensure that `attn_type` under the `model` parameters is set to be either `vanilla` or `flash`. Modify any other hyperparameters, experimental parameters, data paths, and logging parameters from the configuration file before running the code.

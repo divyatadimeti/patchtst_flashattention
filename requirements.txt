@@ -7,5 +7,4 @@ pandas
 numpy
 pytorch_lightning
 typing
-torch>=11.6
-flash-attn --no-build-isolation
+torch
