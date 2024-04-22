@@ -1,29 +1,28 @@
-data:
-  ETTh1:
+default_config:
+  data:
+    dataset: "ETTh1"  
     data_path: "data/ETTh1.csv"
-  ETTm1:
-    data_path: f"https://raw.githubusercontent.com/zhouhaoyi/ETDataset/main/ETT-small/ETTm1.csv"
-  # Traffic:
-model:
-  context_length: 512
-  num_input_channels: 7
-  patch_length: 12
-  forecast_horizon: 96
-  d_model: 128
-  num_heads: 16
-  num_key_value_heads: 16
-  num_hidden_layers: 3
-  attn_type: "flash" 
-training:
-  dataset: "ETTh1"
-  num_workers: 2
-  epochs: 100
-  batch_size: 32
-  learning_rate: 0.0001
-  patience: 30
-  early_stopping: True
-logging:
-  use_wandb: False
-  wandb_project: "patchtst-flashattention"
-  wandb_entity: "patchtst-flashattention"
-  checkpoint_path: "./checkpoints"
+  model:
+    context_length: 512
+    num_input_channels: 7
+    patch_length: 12
+    forecast_horizon: 96
+    d_model: 128
+    num_heads: 16
+    num_key_value_heads: 16
+    num_hidden_layers: 3
+    attn_type: "flash" 
+  training:
+    num_workers: 2
+    epochs: 100
+    batch_size: 32
+    learning_rate: 0.0001
+    patience: 30
+    early_stopping: True
+  logging:
+    use_wandb: False
+    wandb_project: "patchtst-flashattention"
+    wandb_entity: "patchtst-flashattention"
+    wandb_run_name: "patchtst_test"
+    checkpoint_path: "./checkpoints"
+
