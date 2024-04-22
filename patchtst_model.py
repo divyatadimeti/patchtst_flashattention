@@ -85,17 +85,17 @@ class PatchTST(pl.LightningModule):
         self.log('test_mae_loss', test_mae_loss, on_epoch=True, prog_bar=True, logger=True)
 
     # Calculate compute time for a single batch (excluding data loading time)
-    def on_train_batch_start(self, batch, batch_idx):
+    def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
         self.batch_time = time.time()
 
-    def on_train_batch_end(self, outputs, batch, batch_idx):
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
         self.batch_time = time.time() - self.batch_time
         self.log('compute_time', self.batch_time, on_step=True, logger=True)
     
-    def on_train_epoch_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+    def on_train_epoch_start(self, trainer, pl_module):
         self.epoch_start_time = time.time()
 
-    def on_train_epoch_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+    def on_train_epoch_end(self, trainer, pl_module):
         epoch_time = time.time() - self.epoch_start_time
         self.log('total_time', epoch_time, on_step=True, logger=True)
         data_loading_time = epoch_time - self.batch_time
