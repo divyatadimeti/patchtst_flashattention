@@ -25,10 +25,10 @@ def main(args):
 
     for attn in attn_types:
         model_config["attn_type"] = attn
-        patch_sizes_experiment(model_config, train_config, data_config, log_config)
-        batch_sizes_experiment(model_config, train_config, data_config, log_config)
-        dataset_experiment(model_config, train_config, data_config, log_config)
-        num_workers_experiment(model_config, train_config, data_config, log_config)
+        patch_sizes_experiment(data_config, model_config, train_config, log_config)
+        batch_sizes_experiment(data_config, model_config, train_config, log_config)
+        dataset_experiment(data_config, model_config, train_config, log_config)
+        num_workers_experiment(data_config, model_config, train_config, log_config)
 
 
     # driver(model_config, train_config, log_config, data_config)
