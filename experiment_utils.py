@@ -2,11 +2,31 @@ import yaml
 import argparse
 import wandb
 import pytorch_lightning as pl
+import time
 
 from dataloader import get_ETT_dataloaders
 from patchtst_model import PatchTST
 from pytorch_lightning.loggers import WandbLogger
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, LearningRateMonitor
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, LearningRateMonitor, Callback
+
+
+class MetricLogger(Callback):
+    # Calculate compute time for a single batch (excluding data loading time)
+    def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
+        self.batch_time = time.time()
+
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
+        self.batch_time = time.time() - self.batch_time
+        self.log('compute_time', self.batch_time, on_step=True, logger=True)
+    
+    def on_train_epoch_start(self, trainer, pl_module):
+        self.epoch_start_time = time.time()
+
+    def on_train_epoch_end(self, trainer, pl_module):
+        epoch_time = time.time() - self.epoch_start_time
+        self.log('total_time', epoch_time, on_step=True, logger=True)
+        data_loading_time = epoch_time - self.batch_time
+        self.log('data_loading_time', data_loading_time, on_step=True, logger=True)
 
 def patch_sizes_experiment(data_config, model_config, train_config, log_config):
     patch_sizes = [12, 24, 48, 96, 192]
@@ -88,9 +108,12 @@ def driver(data_config, model_config, train_config, log_config):
                                               monitor="val_loss", 
                                               save_top_k=1, 
                                               mode="min")
+    
+    metrics_callback = MetricLogger()
     lr_monitor = LearningRateMonitor(logging_interval='step')
     callbacks.append(checkpoint_callback)
     callbacks.append(lr_monitor)
+    callbacks.append(metrics_callback)
 
     # Set up the trainer
     trainer = pl.Trainer(
