@@ -17,16 +17,17 @@ class MetricLogger(Callback):
 
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
         self.batch_time = time.time() - self.batch_time
-        self.log('compute_time', self.batch_time, on_step=True, logger=True)
+        self.log('compute_time', self.batch_time, on_step=True, on_epoch=False, logger=True)
     
     def on_train_epoch_start(self, trainer, pl_module):
         self.epoch_start_time = time.time()
 
     def on_train_epoch_end(self, trainer, pl_module):
         epoch_time = time.time() - self.epoch_start_time
-        self.log('total_time', epoch_time, on_step=True, logger=True)
+        self.log('total_time', epoch_time, on_step=False, on_epoch=True, logger=True)
+
         data_loading_time = epoch_time - self.batch_time
-        self.log('data_loading_time', data_loading_time, on_step=True, logger=True)
+        self.log('data_loading_time', data_loading_time, on_step=False, on_epoch=True, logger=True)
 
 def patch_sizes_experiment(data_config, model_config, train_config, log_config):
     patch_sizes = [12, 24, 48, 96, 192]
@@ -45,9 +46,10 @@ def batch_sizes_experiment(data_config, model_config, train_config, log_config):
         driver(data_config, model_config, train_config, log_config)
 
 def dataset_experiment(data_config, model_config, train_config, log_config):
-    datasets = ["ETTh1", "ETTm1", "Weather"]
+    datasets = ["ETTh1", "ETTm1"] # TODO: Add weather dataset
     for data in datasets:
         data_config["dataset"] = data
+        data_config["data_path"] = f"data/{data}.csv"
         attn_type = model_config["attn_type"]
         log_config["wandb_run_name"] = f"patchtst_{attn_type}_dataset_{data}"
         driver(data_config, model_config, train_config, log_config)
@@ -62,12 +64,12 @@ def num_workers_experiment(data_config, model_config, train_config, log_config):
 
 
 def driver(data_config, model_config, train_config, log_config):
-     # Set up wandb logging and PyTorch Lightning logger
     # Set up wandb logging and PyTorch Lightning logger
     logger = None
     if log_config["use_wandb"]:
         run = wandb.init(project=log_config["wandb_project"], 
                 entity=log_config["wandb_entity"],
+                tags=["gpu.0.memory"],
                 name=log_config["wandb_run_name"])
         assert run is wandb.run
 
@@ -101,11 +103,11 @@ def driver(data_config, model_config, train_config, log_config):
     # Set up callbacks for early stopping, model checkpointing and learning rate scheduling
     callbacks = []
     if train_config["early_stopping"]:
-        early_stop_callback = EarlyStopping(monitor="val_loss", patience=train_config["patience"])
+        early_stop_callback = EarlyStopping(monitor="val_mse_loss", patience=train_config["patience"])
         callbacks.append(early_stop_callback)
 
     checkpoint_callback = ModelCheckpoint(dirpath=log_config["checkpoint_path"], 
-                                              monitor="val_loss", 
+                                              monitor="val_mse_loss", 
                                               save_top_k=1, 
                                               mode="min")
     
@@ -129,3 +131,5 @@ def driver(data_config, model_config, train_config, log_config):
 
     # Test the model
     trainer.test(model, dataloaders=test_dataloader)
+
+    wandb.finish()

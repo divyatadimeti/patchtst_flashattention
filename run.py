@@ -21,7 +21,7 @@ def main(args):
     data_config = config["data"]
     log_config = config["logging"]
     
-    attn_types = ["vanilla", "flash"]
+    attn_types = ["flash"]
 
     for attn in attn_types:
         model_config["attn_type"] = attn

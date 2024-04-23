@@ -116,15 +116,16 @@ class FlashAttention2(PatchTSTAttention):
         key_states = key_states.transpose(1, 2)
         value_states = value_states.transpose(1, 2)
 
-        attn_dropout = self.attention_dropout if self.training else 0.0
+        attn_dropout = self.dropout if self.training else 0.0
 
         if query_states.dtype == torch.float32:
-            if torch.is_autocast_enabled():
-                target_dtype = torch.get_autocast_gpu_dtype()
-            elif hasattr(self.config, "_pre_quantization_dtype"):
-                target_dtype = self.config._pre_quantization_dtype
-            else:
-                target_dtype = self.q_proj.weight.dtype
+     #       if torch.is_autocast_enabled():
+     #           target_dtype = torch.get_autocast_gpu_dtype()
+     #       elif hasattr(self.config, "_pre_quantization_dtype"):
+     #           target_dtype = self.config._pre_quantization_dtype
+     #       else:
+     #           target_dtype = self.q_proj.weight.dtype
+            target_dtype = torch.float16
 
             query_states = query_states.to(target_dtype)
             key_states = key_states.to(target_dtype)
@@ -135,7 +136,7 @@ class FlashAttention2(PatchTSTAttention):
         )
 
         attn_output = attn_output.reshape(batch_size, query_length, -1).contiguous()
-        attn_output = self.dense(attn_output)
+      # attn_output = self.dense(attn_output)
 
         if not output_attentions:
             attn_weights = None
