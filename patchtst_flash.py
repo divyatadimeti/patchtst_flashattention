@@ -28,18 +28,6 @@ class FlashAttention2(PatchTSTAttention):
         self.causal = causal
         self.num_key_value_heads = num_key_value_heads
     
-    def _rotate_half(self, x):
-        x1 = x[..., : x.shape[-1] // 2]
-        x2 = x[..., x.shape[-1] // 2 :]
-        return torch.cat((-x2, x1), dim=-1)
-    
-    def _apply_rotary_pos_emb(self, q, k, cos, sin, position_ids, unsqueeze_dim=1):
-        cos = cos[position_ids].unsqueeze(unsqueeze_dim)
-        sin = sin[position_ids].unsqueeze(unsqueeze_dim)
-        q_embed = (q * cos) + (self._rotate_half(q) * sin)
-        k_embed = (k * cos) + (self._rotate_half(k) * sin)
-        return q_embed, k_embed
-    
     def _upad_input(self, query_layer, key_layer, value_layer, attention_mask, query_length):
         batch_size, kv_seq_len, num_heads, head_dim = key_layer.shape
 
@@ -173,7 +161,6 @@ class FlashAttention2(PatchTSTAttention):
             attn_output = flash_attn_func(
                 query_states, key_states, value_states, dropout, softmax_scale=softmax_scale, causal=self.causal
             )
-
         return attn_output
 
 class PatchTSTFlashAttention2(PatchTSTForPrediction):

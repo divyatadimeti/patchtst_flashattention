@@ -46,7 +46,7 @@ def batch_sizes_experiment(data_config, model_config, train_config, log_config):
         driver(data_config, model_config, train_config, log_config)
 
 def dataset_experiment(data_config, model_config, train_config, log_config):
-    datasets = ["ETTh1", "ETTm1"] # TODO: Add weather dataset
+    datasets = ["ETTh1", "ETTm1"]
     for data in datasets:
         data_config["dataset"] = data
         data_config["data_path"] = f"data/{data}.csv"
