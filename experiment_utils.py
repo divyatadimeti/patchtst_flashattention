@@ -76,14 +76,11 @@ def driver(data_config, model_config, train_config, log_config):
     # Load dataset and dataloaders depending on the dataset chosen for training
     dataset = data_config["dataset"]
 
-    if dataset == "ETTh1" or dataset == "ETTm1":
-        train_dataloader, val_dataloader, test_dataloader = get_ETT_dataloaders(data_config, 
-                                                                            model_config["context_length"], 
-                                                                            model_config["forecast_horizon"],
-                                                                            train_config["batch_size"],
-                                                                            train_config["num_workers"])
-    else:
-        pass
+    train_dataloader, val_dataloader, test_dataloader = get_ETT_dataloaders(data_config[dataset], 
+                                                                        model_config["context_length"], 
+                                                                        model_config["forecast_horizon"],
+                                                                        train_config["batch_size"],
+                                                                        train_config["num_workers"])
 
     # Load the appropriate model (either Vanilla or FlashAttention2)
     if model_config["attn_type"] == "vanilla":
