@@ -28,8 +28,6 @@ def main(args):
                 patch_sizes_experiment(data_config, model_config, train_config, log_config)
             elif args.batch_size_exp:
                 batch_sizes_experiment(data_config, model_config, train_config, log_config)
-            elif args.dataset_exp:
-                dataset_experiment(data_config, model_config, train_config, log_config)
             elif args.num_workers_exp:            
                 num_workers_experiment(data_config, model_config, train_config, log_config)
     else:
@@ -40,7 +38,6 @@ if __name__ == '__main__':
     parser.add_argument("-c", "--config", type=str, default="./config.yaml", description="The configuration file path to use for training the model")
     parser.add_argument("--patch_size_exp", action="store_true", description="Use this flag to run experiments with modifying patch size while keeping remaining hyperparameters as default")
     parser.add_argument("--batch_size_exp", action="store_true", description="Use this flag to run experiments with modifying batch size while keeping remaining hyperparameters as default")
-    parser.add_argument("--dataset_exp", action="store_true", description="Use this flag to run experiments with modifying the datasets while keeping remaining hyperparameters as default")
     parser.add_argument("--num_workers_exp", action="store_true", description="Use this flag to run experiments with modifying number of workers while keeping remaining hyperparameters as default")
     args = parser.parse_args()
 
