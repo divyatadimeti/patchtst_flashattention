@@ -2,6 +2,7 @@ default_config:
   data:
     dataset: "ETTh1"  
     data_path: "data/ETTh1.csv"
+    resolution: 1
   model:
     context_length: 512
     num_input_channels: 7

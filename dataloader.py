@@ -16,7 +16,7 @@ class ETTDataset(Dataset):
     def __getitem__(self, index):
         return self.data[index]['past_values'], self.data[index]['future_values']
 
-def get_ETT_datasets(data_path, context_length, forecast_horizon, resolution=1):
+def get_ETT_datasets(data_path, context_length, forecast_horizon, resolution):
     timestamp_column = "date"
     id_columns = []
     forecast_columns = ["HUFL", "HULL", "MUFL", "MULL", "LUFL", "LULL", "OT"]
@@ -91,7 +91,8 @@ def get_ETT_dataloaders(data_config,
                         batch_size=32, 
                         num_workers=2):
     data_path = data_config["data_path"]
-    train_dataset, valid_dataset, test_dataset = get_ETT_datasets(data_path, context_length, forecast_horizon)
+    resolution = data_config["resolution"]
+    train_dataset, valid_dataset, test_dataset = get_ETT_datasets(data_path, context_length, forecast_horizon, resolution)
     
     train_dataset = ETTDataset(train_dataset)
     valid_dataset = ETTDataset(valid_dataset)

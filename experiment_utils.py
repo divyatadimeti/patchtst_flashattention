@@ -38,7 +38,7 @@ def patch_sizes_experiment(data_config, model_config, train_config, log_config):
         driver(data_config, model_config, train_config, log_config)
 
 def batch_sizes_experiment(data_config, model_config, train_config, log_config):
-    batch_sizes = [32, 64, 128, 256, 512]
+    batch_sizes = [32, 64, 128]
     for batch_size in batch_sizes:
         train_config["batch_size"] = batch_size
         attn_type = model_config["attn_type"]
@@ -50,6 +50,7 @@ def dataset_experiment(data_config, model_config, train_config, log_config):
     for data in datasets:
         data_config["dataset"] = data
         data_config["data_path"] = f"data/{data}.csv"
+        data_config["resolution"] = 1 if data == "ETTh1" else 4
         attn_type = model_config["attn_type"]
         log_config["wandb_run_name"] = f"patchtst_{attn_type}_dataset_{data}"
         driver(data_config, model_config, train_config, log_config)
