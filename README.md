@@ -46,3 +46,4 @@ The model can be trained using the following command. Use the `--help` flag to d
 ```
 python run.py
 ```
+By default, the above command while run the main driver with the configurations in `config.yaml`. To run experiments using mini hyperparameter sweeps as outlined in our paper with patch size, batch size, datasets and number of workers, utilize the appropriate flags: `--patch_size_exp`, `--batch_size_exp`, `--dataset_exp`, `num_workers_exp`.
