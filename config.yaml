@@ -21,7 +21,7 @@ default_config:
     patience: 30
     early_stopping: True
   logging:
-    use_wandb: False
+    use_wandb: True
     wandb_project: "patchtst-flashattention"
     wandb_entity: "patchtst-flashattention"
     wandb_run_name: "patchtst_test"
