@@ -16,18 +16,18 @@ class ETTDataset(Dataset):
     def __getitem__(self, index):
         return self.data[index]['past_values'], self.data[index]['future_values']
 
-def get_ETT_datasets(data_path, context_length, forecast_horizon):
+def get_ETT_datasets(data_path, context_length, forecast_horizon, resolution=1):
     timestamp_column = "date"
     id_columns = []
     forecast_columns = ["HUFL", "HULL", "MUFL", "MULL", "LUFL", "LULL", "OT"]
     train_start_index = None
-    train_end_index = 12 * 30 * 24
+    train_end_index = 12 * 30 * 24 * resolution
 
-    valid_start_index = 12 * 30 * 24 - context_length
-    valid_end_index = 12 * 30 * 24 + 4 * 30 * 24
+    valid_start_index = 12 * 30 * 24 * resolution - context_length
+    valid_end_index = 12 * 30 * 24 + 4 * 30 * 24 * resolution
 
-    test_start_index = 12 * 30 * 24 + 4 * 30 * 24 - context_length
-    test_end_index = 12 * 30 * 24 + 8 * 30 * 24
+    test_start_index = 12 * 30 * 24 * resolution + 4 * 30 * 24 * resolution - context_length
+    test_end_index = 12 * 30 * 24 * resolution + 8 * 30 * 24 * resolution
 
     data = pd.read_csv(
         data_path,
