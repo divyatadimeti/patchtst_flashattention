@@ -1,7 +1,7 @@
 import yaml
 import argparse
 
-from experiment_utils import patch_sizes_experiment, batch_sizes_experiment, dataset_experiment, num_workers_experiment, driver
+from experiment_utils import patch_sizes_experiment, batch_sizes_experiment, num_workers_experiment, driver
 
 
 def main(args):
@@ -16,7 +16,7 @@ def main(args):
     log_config = default_config["logging"]
 
     # Ensure only one experiment flag is set to True
-    experiment_flags = [args.patch_size_exp, args.batch_size_exp, args.dataset_exp, args.num_workers_exp]
+    experiment_flags = [args.patch_size_exp, args.batch_size_exp, args.num_workers_exp]
     assert sum(experiment_flags) == 1 or sum(experiment_flags) == 0, "Only one experiment flag should be set to True at a time."
     
     if sum(experiment_flags) == 1:
@@ -35,10 +35,10 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Training PatchTST vanilla and FlashAttention2 models for benchmarking and profiling")
-    parser.add_argument("-c", "--config", type=str, default="./config.yaml", description="The configuration file path to use for training the model")
-    parser.add_argument("--patch_size_exp", action="store_true", description="Use this flag to run experiments with modifying patch size while keeping remaining hyperparameters as default")
-    parser.add_argument("--batch_size_exp", action="store_true", description="Use this flag to run experiments with modifying batch size while keeping remaining hyperparameters as default")
-    parser.add_argument("--num_workers_exp", action="store_true", description="Use this flag to run experiments with modifying number of workers while keeping remaining hyperparameters as default")
+    parser.add_argument("-c", "--config", type=str, default="./config.yaml", help="The configuration file path to use for training the model")
+    parser.add_argument("--patch_size_exp", action="store_true", help="Use this flag to run experiments with modifying patch size while keeping remaining hyperparameters as default")
+    parser.add_argument("--batch_size_exp", action="store_true", help="Use this flag to run experiments with modifying batch size while keeping remaining hyperparameters as default")
+    parser.add_argument("--num_workers_exp", action="store_true", help="Use this flag to run experiments with modifying number of workers while keeping remaining hyperparameters as default")
     args = parser.parse_args()
 
     main(args)

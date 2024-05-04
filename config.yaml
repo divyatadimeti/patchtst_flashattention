@@ -1,6 +1,6 @@
 default_config:
   data:
-    dataset: "ETTh1"
+    dataset: "ETTm1"
     ETTh1: 
       data_path: "data/ETTh1.csv"
       resolution: 1
@@ -25,7 +25,7 @@ default_config:
     patience: 30
     early_stopping: True
   logging:
-    use_wandb: True
+    use_wandb: False
     wandb_project: "patchtst-flashattention"
     wandb_entity: "patchtst-flashattention"
     wandb_run_name: "patchtst_test"
