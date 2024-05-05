@@ -20,7 +20,7 @@ default_config:
     prune_head: []
   training:
     num_workers: 2
-    epochs: 2
+    epochs: 100
     batch_size: 32
     learning_rate: 0.0001
     patience: 30
