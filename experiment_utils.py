@@ -31,7 +31,7 @@ class MetricLogger(Callback):
 
 class DynamicPrune(Callback):
     def on_train_epoch_start(self, trainer, pl_module):
-        if self.current_epoch == 15:
+        if trainer.current_epoch == 15:
             model = trainer.model.model.model
             for encoder_layer in model.encoder.layers:
                 encoder_layer.self_attn = dynamic_prune(encoder_layer.self_attn)
