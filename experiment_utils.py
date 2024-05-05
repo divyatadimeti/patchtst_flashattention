@@ -24,10 +24,10 @@ class MetricLogger(Callback):
         epoch_time = time.time() - self.epoch_start_time
         self.total_epoch_times.append(epoch_time)
         self.log('total_time', epoch_time, on_step=False, on_epoch=True, logger=True)
-    
-    def on_fit_end(self, trainer, pl_module) -> None:
-        avg_total_time = np.mean(self.total_epoch_times)
-        self.log('avg_total_time', avg_total_time, on_step=False, on_epoch=True, logger=True)
+
+    def on_train_end(self, trainer, pl_module):
+        self.avg_total_time = np.mean(self.total_epoch_times)
+        trainer.logger.experiment.log({"avg_total_time": self.avg_total_time})
 
 class DynamicPrune(Callback):
     def on_train_epoch_start(self, trainer, pl_module):
@@ -45,7 +45,7 @@ def patch_sizes_experiment(data_config, model_config, train_config, log_config):
         driver(data_config, model_config, train_config, log_config)
 
 def batch_sizes_experiment(data_config, model_config, train_config, log_config):
-    batch_sizes = [32, 64, 128]
+    batch_sizes = [32, 64, 128, 256, 512]
     for batch_size in batch_sizes:
         train_config["batch_size"] = batch_size
         attn_type = model_config["attn_type"]
