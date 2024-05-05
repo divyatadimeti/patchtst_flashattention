@@ -19,14 +19,14 @@ def dynamic_prune(attention_module, num_heads=2):
     num_heads = attention_module.num_heads
     head_dim = d_model // num_heads
 
-    head_norms = torch.zeros(num_heads)
+    head_norms = torch.zeros(num_heads).to(attention_module.device)
     for proj in [attention_module.q_proj, attention_module.k_proj, attention_module.v_proj]:
-        reshaped_weights = proj.weight.data.view(num_heads, head_dim, -1)
+        reshaped_weights = proj.weight.data.view(num_heads, head_dim, -1).to(attention_module.device)
         head_norms += reshaped_weights.norm(p=2, dim=[1, 2])
     
     _, heads_to_prune = torch.topk(head_norms, num_heads, largest=False)
 
     for head in heads_to_prune:
-        pruned_attention_module = prune_head(attention_module, head)
+        pruned_attention_module = prune_head(attention_module, head.item())
 
     return pruned_attention_module
