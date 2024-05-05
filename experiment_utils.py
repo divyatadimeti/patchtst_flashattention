@@ -2,6 +2,7 @@ import yaml
 import argparse
 import wandb
 import pytorch_lightning as pl
+import numpy as np
 import time
 
 from dataloader import get_ETT_dataloaders
@@ -13,11 +14,10 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, Learning
 class MetricLogger(Callback):
     # Calculate compute time for a single batch (excluding data loading time)
     def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
-        self.batch_time = time.time()
+        self.start_batch_time = time.time()
 
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
-        self.batch_time = time.time() - self.batch_time
-        self.log('compute_time', self.batch_time, on_step=True, on_epoch=False, logger=True)
+        self.total_batch_time = time.time() - self.start_batch_time
     
     def on_train_epoch_start(self, trainer, pl_module):
         self.epoch_start_time = time.time()
@@ -26,8 +26,12 @@ class MetricLogger(Callback):
         epoch_time = time.time() - self.epoch_start_time
         self.log('total_time', epoch_time, on_step=False, on_epoch=True, logger=True)
 
-        data_loading_time = epoch_time - self.batch_time
+        data_loading_time = trainer.profiler.recorded_durations
+        print(data_loading_time.keys())
         self.log('data_loading_time', data_loading_time, on_step=False, on_epoch=True, logger=True)
+
+        print(data_loading_time)
+        self.log('compute_time', self.total_batch_time, on_step=False, on_epoch=True, logger=True)
 
 def patch_sizes_experiment(data_config, model_config, train_config, log_config):
     patch_sizes = [12, 24, 48, 96, 192]
@@ -52,7 +56,6 @@ def num_workers_experiment(data_config, model_config, train_config, log_config):
         attn_type = model_config["attn_type"]
         log_config["wandb_run_name"] = f"patchtst_{attn_type}_numworkers_{num}"
         driver(data_config, model_config, train_config, log_config)
-
 
 def driver(data_config, model_config, train_config, log_config):
     # Set up wandb logging and PyTorch Lightning logger
@@ -99,11 +102,9 @@ def driver(data_config, model_config, train_config, log_config):
                                               save_top_k=1, 
                                               mode="min")
     
-    metrics_callback = MetricLogger()
     lr_monitor = LearningRateMonitor(logging_interval='step')
     callbacks.append(checkpoint_callback)
     callbacks.append(lr_monitor)
-    callbacks.append(metrics_callback)
 
     # Set up the trainer
     trainer = pl.Trainer(
@@ -112,12 +113,19 @@ def driver(data_config, model_config, train_config, log_config):
         max_epochs=train_config["epochs"],
         logger=logger,
         callbacks=callbacks,
+        profiler="simple",
     )
 
     # Train the model
     trainer.fit(model, train_dataloader, val_dataloader)
 
+    # Log avergage data loading time
+    if log_config["use_wandb"]:
+        avg_data_loading_time = np.mean(trainer.profiler.recorded_durations["[_TrainingEpochLoop].train_dataloader_next"])
+        wandb.log({"avg_data_loading_time": avg_data_loading_time})
+
     # Test the model
     trainer.test(model, dataloaders=test_dataloader)
 
-    wandb.finish()
+    if log_config["use_wandb"]:
+        wandb.finish()

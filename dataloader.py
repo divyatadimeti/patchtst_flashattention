@@ -24,7 +24,7 @@ def get_ETT_datasets(data_path, context_length, forecast_horizon, resolution):
     train_end_index = 12 * 30 * 24 * resolution
 
     valid_start_index = 12 * 30 * 24 * resolution - context_length
-    valid_end_index = 12 * 30 * 24 + 4 * 30 * 24 * resolution
+    valid_end_index = 12 * 30 * 24 * resolution + 4 * 30 * 24 * resolution
 
     test_start_index = 12 * 30 * 24 * resolution + 4 * 30 * 24 * resolution - context_length
     test_end_index = 12 * 30 * 24 * resolution + 8 * 30 * 24 * resolution
@@ -33,17 +33,6 @@ def get_ETT_datasets(data_path, context_length, forecast_horizon, resolution):
         data_path,
         parse_dates=[timestamp_column],
     )
-
-    print(len(data))
-    print("indices:")
-    print(train_start_index)
-    print(train_end_index)
-
-    print(valid_start_index)
-    print(valid_end_index)
-
-    print(test_start_index)
-    print(test_end_index)
 
     train_data = select_by_index(
         data,

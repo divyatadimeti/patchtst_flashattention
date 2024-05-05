@@ -16,16 +16,17 @@ default_config:
     num_heads: 16
     num_key_value_heads: 16
     num_hidden_layers: 3
-    attn_type: "flash" 
+    attn_type: "flash"
+    prune_head: []
   training:
     num_workers: 2
-    epochs: 100
+    epochs: 2
     batch_size: 32
     learning_rate: 0.0001
     patience: 30
     early_stopping: True
   logging:
-    use_wandb: False
+    use_wandb: True
     wandb_project: "patchtst-flashattention"
     wandb_entity: "patchtst-flashattention"
     wandb_run_name: "patchtst_test"

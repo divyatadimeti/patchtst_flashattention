@@ -2,6 +2,7 @@ import torch
 import time
 import pytorch_lightning as pl
 import torch.nn.functional as F
+import torch.nn.utils.prune as prune
 
 from transformers import PatchTSTConfig, PatchTSTForPrediction
 from patchtst_flash import PatchTSTFlashConfig, PatchTSTFlashAttention2
@@ -52,6 +53,26 @@ class PatchTST(pl.LightningModule):
                                     norm_type="batchnorm",
                                     )
             self.model = PatchTSTFlashAttention2(config=config)
+            if model_config["prune_head"]:
+                for head in model_config["prune_head"]:
+                    self.prune_attention_head(head)
+
+    def prune_attention_head(self, head_to_prune):
+        for encoder_layer in self.model.model.encoder.layers:
+            attention_module = encoder_layer.self_attn
+            d_model = attention_module.embed_dim
+            num_heads = attention_module.num_heads
+            head_dim = d_model // num_heads
+
+            start = head_dim * head_to_prune
+            end = start + head_dim
+
+            for proj in [attention_module.q_proj, attention_module.k_proj, attention_module.v_proj]:
+                proj.weight.data[:, start:end] = 0
+                if proj.bias is not None:
+                    proj.bias.data[start:end] = 0
+
+            encoder_layer.self_attn = attention_module
 
     def forward(self, x):
         return self.model(x)
