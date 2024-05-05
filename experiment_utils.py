@@ -96,10 +96,11 @@ def driver(data_config, model_config, train_config, log_config):
                                               monitor="val_mse_loss", 
                                               save_top_k=1, 
                                               mode="min")
-    
     lr_monitor = LearningRateMonitor(logging_interval='step')
+    metric_logger = MetricLogger()
     callbacks.append(checkpoint_callback)
     callbacks.append(lr_monitor)
+    callbacks.append(metric_logger)
 
     # Set up the trainer
     trainer = pl.Trainer(
