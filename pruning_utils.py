@@ -14,7 +14,7 @@ def prune_head(attention_module, head_to_prune):
             proj.bias.data[start:end] = 0
     return attention_module
 
-def dynamic_prune(attention_module, num_heads=1):
+def dynamic_prune(attention_module, num_heads=2):
     d_model = attention_module.embed_dim
     num_heads = attention_module.num_heads
     head_dim = d_model // num_heads
