@@ -6,6 +6,7 @@ import numpy as np
 import time
 
 from dataloader import get_ETT_dataloaders
+from pruning_utils import dynamic_prune
 from patchtst_model import PatchTST
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, LearningRateMonitor, Callback
@@ -27,6 +28,13 @@ class MetricLogger(Callback):
     def on_fit_end(self, trainer, pl_module) -> None:
         avg_total_time = np.mean(self.total_epoch_times)
         self.log('avg_total_time', avg_total_time, on_step=False, on_epoch=True, logger=True)
+
+class DynamicPrune(Callback):
+    def on_train_epoch_start(self, trainer, pl_module):
+        if self.current_epoch == 15:
+            model = trainer.model.model.model
+            for encoder_layer in model.encoder.layers:
+                encoder_layer.self_attn = dynamic_prune(encoder_layer.self_attn)
 
 def patch_sizes_experiment(data_config, model_config, train_config, log_config):
     patch_sizes = [12, 24, 48, 96, 192]
@@ -79,6 +87,9 @@ def driver(data_config, model_config, train_config, log_config):
                                                                         model_config["forecast_horizon"],
                                                                         train_config["batch_size"],
                                                                         train_config["num_workers"])
+    
+    # Before loading model ensure that we are either using dynamic or head specific pruning
+    assert not (model_config["prune_heads"] and model_config["dynamic_prune"])
 
     # Load the appropriate model (either Vanilla or FlashAttention2)
     if model_config["attn_type"] == "vanilla":
@@ -102,6 +113,11 @@ def driver(data_config, model_config, train_config, log_config):
     callbacks.append(lr_monitor)
     callbacks.append(metric_logger)
 
+    # Add dynamic prune callback if we selected it as true
+    if model_config["dynamic_prune"]:
+        dynamic_prune_callback = DynamicPrune()
+        callbacks.append(dynamic_prune_callback)
+
     # Set up the trainer
     trainer = pl.Trainer(
         accelerator="gpu",
@@ -115,7 +131,7 @@ def driver(data_config, model_config, train_config, log_config):
     # Train the model
     trainer.fit(model, train_dataloader, val_dataloader)
 
-    # Log avergage data loading time
+    # Log avergage data loading time from profiler
     if log_config["use_wandb"]:
         avg_data_loading_time = np.mean(trainer.profiler.recorded_durations["[_TrainingEpochLoop].train_dataloader_next"])
         wandb.log({"avg_data_loading_time": avg_data_loading_time})

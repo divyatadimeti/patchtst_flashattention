@@ -17,7 +17,8 @@ default_config:
     num_key_value_heads: 16
     num_hidden_layers: 3
     attn_type: "flash"
-    prune_head: []
+    prune_heads: []
+    dynamic_prune: True
   training:
     num_workers: 2
     epochs: 100
