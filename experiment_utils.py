@@ -12,26 +12,21 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, Learning
 
 
 class MetricLogger(Callback):
-    # Calculate compute time for a single batch (excluding data loading time)
-    def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
-        self.start_batch_time = time.time()
+    def __init__(self) -> None:
+        super().__init__()
+        self.total_epoch_times = []
 
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
-        self.total_batch_time = time.time() - self.start_batch_time
-    
     def on_train_epoch_start(self, trainer, pl_module):
         self.epoch_start_time = time.time()
 
     def on_train_epoch_end(self, trainer, pl_module):
         epoch_time = time.time() - self.epoch_start_time
+        self.total_epoch_times.append(epoch_time)
         self.log('total_time', epoch_time, on_step=False, on_epoch=True, logger=True)
-
-        data_loading_time = trainer.profiler.recorded_durations
-        print(data_loading_time.keys())
-        self.log('data_loading_time', data_loading_time, on_step=False, on_epoch=True, logger=True)
-
-        print(data_loading_time)
-        self.log('compute_time', self.total_batch_time, on_step=False, on_epoch=True, logger=True)
+    
+    def on_fit_end(self, trainer, pl_module) -> None:
+        avg_total_time = np.mean(self.total_epoch_times)
+        self.log('avg_total_time', avg_total_time, on_step=False, on_epoch=True, logger=True)
 
 def patch_sizes_experiment(data_config, model_config, train_config, log_config):
     patch_sizes = [12, 24, 48, 96, 192]
