@@ -5,6 +5,11 @@ This repository contains an implementation of the PatchTST model using both vani
 
 ### Outline of Repository
 
+
+#### config.yaml
+
+Configures parameters for data, model, training, and logging in the PatchTST model experiments. Includes dataset paths, model architecture specifics (such as attention type and pruning settings), training settings (batch size, epochs), and Weights and Biases integration for experiment tracking and checkpointing.
+
 #### dataloader.py
 
 Defines PyTorch data loading utilities for the Energy Trading Time-series (ETT) dataset. Includes `ETTDataset` class for time-series data handling, `get_ETT_datasets` for preprocessing and dataset splitting, and `get_ETT_dataloaders` for creating DataLoader objects. Utilizes `tsfm_public.toolkit` for efficient data management and preprocessing.
