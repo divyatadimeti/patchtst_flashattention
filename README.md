@@ -18,6 +18,24 @@ Defines PyTorch data loading utilities for the Energy Trading Time-series (ETT) 
 
 Provides utility functions for conducting performance experiments on the PatchTST model with different configurations like patch sizes, batch sizes, and number of workers. Includes dynamic and head-specific pruning experiments, integration with Weights and Biases for logging, and orchestration of training sessions using PyTorch Lightning. Utilizes custom callbacks for detailed performance metrics.
 
+#### patchtst_flash.py
+
+Implements the FlashAttention2 mechanism within the PatchTST model. Extends PyTorch and Hugging Face's Transformers frameworks to integrate custom attention mechanisms. Includes classes for configurable model parameters and attention processes.
+
+#### patchtst_model.py
+
+Implements the PatchTST model as a PyTorch Lightning module, supporting different attention mechanisms including FlashAttention2. Enables dynamic and static pruning of attention heads. Provides comprehensive methods for training, validation, and testing phases, including performance logging for MSE and MAE losses.
+
+#### pruning_utils.py
+
+Provides utility functions for pruning attention heads. Supports both static and dynamic pruning.
+
+#### run.py
+
+Script to run experiments with the PatchTST model. Supports testing different configurations with patch sizes, batch sizes, and number of workers through command-line arguments. Utilizes configurations loaded from config.yaml file and integrates experiments defined in `experiment_utils.py`. Ensures only one type of experiment is conducted at a time.
+
+
+
 
 
 ### Installation
