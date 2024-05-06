@@ -67,13 +67,6 @@ Both models were compared based on MSE losses across training, validation, and t
 - Training and validation losses were similar between the models, but PatchTST with FlashAttention2 showed slightly higher losses than vanilla attention.
 - On the ETTh1 dataset, FlashAttention2 showed lower test MSE loss, indicating better performance in smaller datasets.
 
-#### Loss Plots
-<img src="plots/train_mse.png" alt="Train MSE Loss" width="400"/>
-*Train MSE Loss for both models*
-
-<img src="plots/val_mse.png" alt="Validation MSE Loss" width="400"/>
-*Validation MSE Loss for both models*
-
 ### Batch Size Impact
 
 We explored the effect of varying batch sizes on model performance. Larger batch sizes decreased total time and compute time, enhancing efficiency, especially for FlashAttention2.
