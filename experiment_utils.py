@@ -29,13 +29,6 @@ class MetricLogger(Callback):
         self.avg_total_time = np.mean(self.total_epoch_times)
         trainer.logger.experiment.log({"avg_total_time": self.avg_total_time})
 
-class DynamicPrune(Callback):
-    def on_train_epoch_start(self, trainer, pl_module):
-        if trainer.current_epoch == 15:
-            model = trainer.model.model.model
-            for encoder_layer in model.encoder.layers:
-                encoder_layer.self_attn = dynamic_prune(encoder_layer.self_attn)
-
 def patch_sizes_experiment(data_config, model_config, train_config, log_config):
     patch_sizes = [12, 24, 48, 96, 192]
     for patch_size in patch_sizes:
@@ -112,11 +105,6 @@ def driver(data_config, model_config, train_config, log_config):
     callbacks.append(checkpoint_callback)
     callbacks.append(lr_monitor)
     callbacks.append(metric_logger)
-
-    # Add dynamic prune callback if we selected it as true
-    if model_config["dynamic_prune"]:
-        dynamic_prune_callback = DynamicPrune()
-        callbacks.append(dynamic_prune_callback)
 
     # Set up the trainer
     trainer = pl.Trainer(

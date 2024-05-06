@@ -22,7 +22,7 @@ default_config:
   training:
     num_workers: 2
     epochs: 100
-    batch_size: 512
+    batch_size: 32
     learning_rate: 0.0001
     patience: 30
     early_stopping: True
@@ -30,6 +30,6 @@ default_config:
     use_wandb: True
     wandb_project: "patchtst-flashattention"
     wandb_entity: "patchtst-flashattention"
-    wandb_run_name: "patchtst_best_configs_dynamic_prune"
+    wandb_run_name: "patchtst_flasattention_test"
     checkpoint_path: "./checkpoints"
 
