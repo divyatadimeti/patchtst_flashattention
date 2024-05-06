@@ -60,13 +60,6 @@ By default, the above command while run the main driver with the configurations 
 
 We evaluated the PatchTST model with both vanilla attention and FlashAttention2 using the ETTm1 dataset. Below are the key findings:
 
-### MSE Losses Comparison
-
-Both models were compared based on MSE losses across training, validation, and test datasets:
-
-- Training and validation losses were similar between the models, but PatchTST with FlashAttention2 showed slightly higher losses than vanilla attention.
-- On the ETTh1 dataset, FlashAttention2 showed lower test MSE loss, indicating better performance in smaller datasets.
-
 ### Batch Size Impact
 
 We explored the effect of varying batch sizes on model performance. Larger batch sizes decreased total time and compute time, enhancing efficiency, especially for FlashAttention2.
