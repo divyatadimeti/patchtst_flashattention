@@ -71,7 +71,8 @@ Both models were compared based on MSE losses across training, validation, and t
 <img src="plots/train_mse.png" alt="Train MSE Loss" width="400"/>
 *Train MSE Loss for both models*
 
-![Validation MSE Loss](plots/val_mse.png)
+
+<img src="plots/val_mse.png" alt="Validation MSE Loss" width="400"/>
 *Validation MSE Loss for both models*
 
 ### Batch Size Impact
@@ -87,7 +88,8 @@ We explored the effect of varying batch sizes on model performance. Increasing t
 | 64         | 17.6110 sec                  | 14.9090 sec                |
 | 32         | 24.7230 sec                  | 23.2630 sec                |
 
-![Batch Size Impact](plots/batchsize_plot.png)
+
+<img src="plots/batchsize_plot.png" alt="Batch Size Impact" width="400"/>
 *Total time speedup percentage for varying batch sizes*
 
 ### Patch Size Variation
@@ -103,7 +105,7 @@ Varying the patch size revealed that smaller patches enhanced the performance of
 | 24         | 9.4820 sec                   | 8.5881 sec                 |
 | 12         | 13.8270 sec                  | 10.1900 sec                |
 
-![Patch Size Impact](plots/patchsize_plot.png)
+<img src="plots/patchsize_plot.png" alt="Patch Size Impact" width="400"/>
 *Total time speedup percentage for varying patch sizes*
 
 ### Worker Impact on Performance
@@ -118,7 +120,7 @@ Increasing the number of workers consistently reduced data loading times, enhanc
 | 4                 | 14.013 sec                   | 10.054 sec                 |
 | 2                 | 13.961 sec                   | 10.178 sec                 |
 
-![Number of Workers Impact](plots/numworkers_plot.png)
+<img src="plots/numworkers_plot.png" alt="Number of Workers Impact" width="400"/>
 *Total time speedup percentage for varying number of workers*
 
 ### Pruning Impact
@@ -126,5 +128,6 @@ Increasing the number of workers consistently reduced data loading times, enhanc
 Pruning experiments showed that dynamic pruning with 5 heads per layer resulted in significant improvements in speed and minimal impact on loss.
 
 #### Pruning Results
-![Validation MSE Loss Pruning](plots/val_mse_pruning.png)
+
+<img src="plots/val_mse_pruning.png" alt="Validation MSE Loss Pruning" width="400"/>
 *Validation MSE Loss for models with and without pruning*
