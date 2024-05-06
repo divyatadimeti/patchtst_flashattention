@@ -10,6 +10,16 @@ from flash_attn.bert_padding import index_first_axis, pad_input, unpad_input
 from transformers.models.llama.modeling_llama import _get_unpad_data
 
 class PatchTSTFlashConfig(PatchTSTConfig):
+    """
+    PatchTSTFlashConfig extends the PatchTSTConfig with additional configurations specific to the FlashAttention mechanism.
+
+    Attributes:
+        causal (bool): If True, the attention mechanism is causal, meaning it prevents the model from attending to future tokens.
+        num_key_value_heads (int): The number of key/value heads in the attention mechanism.
+
+    The class constructor accepts additional parameters for causal attention and the number of key/value heads,
+    which are specific to the FlashAttention mechanism used in the PatchTST model.
+    """
     def __init__(self, 
                  causal,
                  num_key_value_heads,
@@ -20,6 +30,15 @@ class PatchTSTFlashConfig(PatchTSTConfig):
         self.num_key_value_heads = num_key_value_heads
 
 class FlashAttention2(PatchTSTAttention):
+    """
+    FlashAttention2 extends PatchTSTAttention with FlashAttention mechanism.
+
+    This class implements a variant of the attention mechanism that is optimized for speed and memory efficiency. 
+
+    Attributes:
+        causal (bool): If True, the attention mechanism is causal.
+        num_key_value_heads (int): The number of key/value heads in the attention mechanism.
+    """
     def __init__(self, 
                  causal, 
                  num_key_value_heads,
@@ -28,6 +47,9 @@ class FlashAttention2(PatchTSTAttention):
         self.causal = causal
         self.num_key_value_heads = num_key_value_heads
     
+    # Code utilized from the Mistral and Phi FlashAttention2 implementation:
+    # https://github.com/huggingface/transformers/tree/main/src/transformers/models/mistral
+    # https://github.com/huggingface/transformers/tree/main/src/transformers/models/phi
     def _upad_input(self, query_layer, key_layer, value_layer, attention_mask, query_length):
         batch_size, kv_seq_len, num_heads, head_dim = key_layer.shape
 
@@ -67,6 +89,9 @@ class FlashAttention2(PatchTSTAttention):
             (max_seqlen_in_batch_q, max_seqlen_in_batch_k),
         )
 
+    # Code utilized from the Mistral and Phi FlashAttention2 implementation:
+    # https://github.com/huggingface/transformers/tree/main/src/transformers/models/mistral
+    # https://github.com/huggingface/transformers/tree/main/src/transformers/models/phi
     def _repeat_kv(self, hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
         batch, num_key_value_heads, slen, head_dim = hidden_states.shape
         if n_rep == 1:
@@ -74,6 +99,9 @@ class FlashAttention2(PatchTSTAttention):
         hidden_states = hidden_states[:, :, None, :, :].expand(batch, num_key_value_heads, n_rep, slen, head_dim)
         return hidden_states.reshape(batch, num_key_value_heads * n_rep, slen, head_dim)
         
+    # Code utilized and slightly modified from the Mistral and Phi FlashAttention2 implementation:
+    # https://github.com/huggingface/transformers/tree/main/src/transformers/models/mistral
+    # https://github.com/huggingface/transformers/tree/main/src/transformers/models/phi
     def forward(
         self,
         hidden_states: torch.Tensor,
@@ -124,6 +152,9 @@ class FlashAttention2(PatchTSTAttention):
 
         return attn_output, attn_weights, past_key_value
 
+    # Code utilized and slightly modified from the Mistral and Phi FlashAttention2 implementation:
+    # https://github.com/huggingface/transformers/tree/main/src/transformers/models/mistral
+    # https://github.com/huggingface/transformers/tree/main/src/transformers/models/phi
     def _flashattention_forward(
         self,
         query_states,
@@ -164,6 +195,16 @@ class FlashAttention2(PatchTSTAttention):
         return attn_output
 
 class PatchTSTFlashAttention2(PatchTSTForPrediction):
+    """
+    PatchTSTFlashAttention2 is a specialized version of the PatchTSTForPrediction class that incorporates
+    the FlashAttention2 mechanism into the Transformer encoder layers of the model.
+
+    Attributes:
+        config (PatchTSTConfig): Configuration object containing model settings.
+
+    Methods:
+        __init__: Initializes the PatchTSTFlashAttention2 model with the specified configuration.
+    """
     def __init__(self, config: PatchTSTConfig):
         super().__init__(config)
         for encoder_layer in self.model.encoder.layers:

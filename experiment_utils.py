@@ -13,6 +13,19 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, Learning
 
 
 class MetricLogger(Callback):
+    """
+    A callback class for logging the total time and average total time during the training process.
+
+    This class uses the PyTorch Lightning `Callback` methods to log the duration of each training epoch 
+    and compute the average training time over all epochs. 
+    
+    It also logs these metrics to the Weights and Biases experiment logger.
+
+    Attributes:
+        total_epoch_times (list): A list to store the duration of each epoch.
+        epoch_start_time (float): The start time of the current epoch.
+        avg_total_time (float): The average duration of all epochs.
+    """
     def __init__(self) -> None:
         super().__init__()
         self.total_epoch_times = []
@@ -30,6 +43,22 @@ class MetricLogger(Callback):
         trainer.logger.experiment.log({"avg_total_time": self.avg_total_time})
 
 def patch_sizes_experiment(data_config, model_config, train_config, log_config):
+    """
+    Conducts experiments to evaluate the model's performance across different patch sizes.
+
+    This function iterates over a predefined list of patch sizes and configures the model to use each
+    specified patch size. It logs the model's performance for each configuration to help determine the optimal
+    patch size for balancing accuracy and computational efficiency.
+
+    Args:
+        data_config (dict): Configuration related to the dataset including paths and preprocessing details.
+        model_config (dict): Configuration related to the model such as attention type, pruning settings, etc.
+        train_config (dict): Configuration related to the training process like batch size, number of workers, etc.
+        log_config (dict): Configuration related to logging and checkpointing.
+
+    Returns:
+        None: This function does not return any value but triggers the training process for each patch size configuration.
+    """
     patch_sizes = [12, 24, 48, 96, 192]
     for patch_size in patch_sizes:
         model_config["patch_length"] = patch_size
@@ -38,6 +67,22 @@ def patch_sizes_experiment(data_config, model_config, train_config, log_config):
         driver(data_config, model_config, train_config, log_config)
 
 def batch_sizes_experiment(data_config, model_config, train_config, log_config):
+    """
+    Conducts experiments to evaluate the model's performance across different batch sizes.
+
+    This function iterates over a predefined list of batch sizes and configures the training environment to use each
+    specified batch size. It logs the model's performance for each configuration to help determine the optimal
+    batch size for balancing training speed and resource utilization.
+
+    Args:
+        data_config (dict): Configuration related to the dataset including paths and preprocessing details.
+        model_config (dict): Configuration related to the model such as attention type, pruning settings, etc.
+        train_config (dict): Configuration related to the training process like batch size, number of workers, etc.
+        log_config (dict): Configuration related to logging and checkpointing.
+
+    Returns:
+        None: This function does not return any value but triggers the training process for each batch size configuration.
+    """
     batch_sizes = [32, 64, 128, 256, 512]
     for batch_size in batch_sizes:
         train_config["batch_size"] = batch_size
@@ -46,6 +91,22 @@ def batch_sizes_experiment(data_config, model_config, train_config, log_config):
         driver(data_config, model_config, train_config, log_config)
 
 def num_workers_experiment(data_config, model_config, train_config, log_config):
+    """
+    Conducts experiments to evaluate the model's performance across different numbers of workers used for data loading.
+
+    This function iterates over a predefined list of worker counts and configures the training environment to use each
+    specified number of workers. It logs the model's performance for each configuration to help determine the optimal
+    number of workers for balancing data loading efficiency and training speed.
+
+    Args:
+        data_config (dict): Configuration related to the dataset including paths and preprocessing details.
+        model_config (dict): Configuration related to the model such as attention type, pruning settings, etc.
+        train_config (dict): Configuration related to the training process like batch size, number of workers, etc.
+        log_config (dict): Configuration related to logging and checkpointing.
+
+    Returns:
+        None: This function does not return any value but triggers the training process for each worker configuration.
+    """
     num_workers = [2, 4, 8, 16]
     for num in num_workers:
         train_config["num_workers"] = num
@@ -54,6 +115,21 @@ def num_workers_experiment(data_config, model_config, train_config, log_config):
         driver(data_config, model_config, train_config, log_config)
 
 def driver(data_config, model_config, train_config, log_config):
+    """
+    The driver function orchestrates the training, validation, and testing of the PatchTST model.
+    It sets up the environment, initializes the model, and starts the training process using PyTorch Lightning.
+    This function is called for each experiment configuration to evaluate different model settings.
+
+    Args:
+        data_config (dict): Configuration related to the dataset including paths and preprocessing details.
+        model_config (dict): Configuration related to the model such as attention type, pruning settings, etc.
+        train_config (dict): Configuration related to the training process like batch size, number of workers, etc.
+        log_config (dict): Configuration related to logging and checkpointing.
+
+    Returns:
+        None: This function does not return any value but triggers the training process.
+    """
+
     # Set up wandb logging and PyTorch Lightning logger
     logger = None
     if log_config["use_wandb"]:
@@ -86,9 +162,9 @@ def driver(data_config, model_config, train_config, log_config):
 
     # Load the appropriate model (either Vanilla or FlashAttention2)
     if model_config["attn_type"] == "vanilla":
-        model = PatchTST(model_config)
+        model = PatchTST(model_config, train_config["learning_rate"])
     else:
-        model = PatchTST(model_config)
+        model = PatchTST(model_config, train_config["learning_rate"])
 
     # Set up callbacks for early stopping, model checkpointing and learning rate scheduling
     callbacks = []

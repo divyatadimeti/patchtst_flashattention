@@ -8,8 +8,24 @@ from patchtst_flash import PatchTSTFlashConfig, PatchTSTFlashAttention2
 from pruning_utils import prune_head, dynamic_prune
 
 class PatchTST(pl.LightningModule):
-    def __init__(self, model_config):
+    """
+    A PyTorch Lightning module for training and using the PatchTST model with optional
+    attention type configurations and pruning strategies.
+
+    Attributes:
+        model (torch.nn.Module): The underlying PatchTST model instance.
+    """
+    def __init__(self, model_config, lr=0.001):
+        """
+        Initializes the PatchTST model based on the provided configuration.
+        
+        Args:
+            model_config (dict): A configuration dictionary containing model settings.
+        """
         super().__init__()
+        self.learning_rate = lr
+
+        # Configure the model based on the attention type specified in the model_config
         if model_config["attn_type"] == "vanilla":
             config = PatchTSTConfig(do_mask_input=False,
                                     context_length=model_config["context_length"],
@@ -54,6 +70,7 @@ class PatchTST(pl.LightningModule):
                                     )
             self.model = PatchTSTFlashAttention2(config=config)
 
+            # Conditionally prune attention heads if specified in configuration
             if model_config["prune_heads"]:
                 for head in model_config["prune_heads"]:
                     self.prune_attention_layers(head_to_prune=head)
@@ -62,6 +79,14 @@ class PatchTST(pl.LightningModule):
                 self.prune_attention_layers(dynamic=True)
 
     def prune_attention_layers(self, head_to_prune=None, dynamic=False):
+        """
+        Prunes attention layers either dynamically or by specified head indices.
+        
+        Args:
+            head_to_prune (int, optional): Index of the head to prune.
+            dynamic (bool): If True, apply dynamic pruning strategy.
+        """
+        # Iterate through each encoder layer to apply the pruning
         for encoder_layer in self.model.model.encoder.layers:
             if dynamic:
                 encoder_layer.self_attn = dynamic_prune(encoder_layer.self_attn)
@@ -69,12 +94,33 @@ class PatchTST(pl.LightningModule):
                 encoder_layer.self_attn = prune_head(encoder_layer.self_attn, head_to_prune)
 
     def forward(self, x):
+        """
+        Defines the forward pass of the model.
+        
+        Args:
+            x (torch.Tensor): The input tensor.
+
+        Returns:
+            torch.Tensor: The output of the model.
+        """
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
+        """
+        Performs a single training step. Logs the train MSE and MAE losses for the
+        training step every epoch.
+        
+        Args:
+            batch (tuple): The input and target batch.
+            batch_idx (int): The index of the current batch.
+
+        Returns:
+            torch.Tensor: The MSE loss of the current batch.
+        """
         x, y = batch
         outputs = self(x)
-        y_hat = outputs.prediction_outputs  # Correctly accessing the prediction tensor
+        # Correctly access the prediction tensor based on the format of the data
+        y_hat = outputs.prediction_outputs
         mse_loss = F.mse_loss(y_hat, y)
         mae_loss = F.l1_loss(y_hat, y)
         self.log('train_mse_loss', mse_loss, on_epoch=True, prog_bar=True, logger=True)
@@ -82,23 +128,47 @@ class PatchTST(pl.LightningModule):
         return mse_loss
 
     def validation_step(self, batch, batch_idx):
+        """
+        Performs a validation step using the provided batch. Logs the validation MSE and
+        MAE losses for the validation step every epoch.
+
+        Args:
+            batch (tuple): The input and target batch.
+            batch_idx (int): The index of the current batch.
+        """
         x, y = batch
         outputs = self(x)
-        y_hat = outputs.prediction_outputs  # Correctly accessing the prediction tensor
+        # Correctly access the prediction tensor based on the format of the data
+        y_hat = outputs.prediction_outputs
         val_mse_loss = F.mse_loss(y_hat, y)
         val_mae_loss = F.l1_loss(y_hat, y)
         self.log('val_mse_loss', val_mse_loss, on_epoch=True, prog_bar=True, logger=True)
         self.log('val_mae_loss', val_mae_loss, on_epoch=True, prog_bar=True, logger=True)
 
     def test_step(self, batch, batch_idx):
+        """
+        Performs a test step using the provided batch. Logs the test MSE and MAE losses
+        for the test step.
+
+        Args:
+            batch (tuple): The input and target batch.
+            batch_idx (int): The index of the current batch.
+        """
         x, y = batch
         outputs = self(x)
-        y_hat = outputs.prediction_outputs  # Correctly accessing the prediction tensor
+        # Correctly access the prediction tensor based on the format of the data
+        y_hat = outputs.prediction_outputs
         test_mse_loss = F.mse_loss(y_hat, y)
         test_mae_loss = F.l1_loss(y_hat, y)
         self.log('test_mse_loss', test_mse_loss, on_epoch=True, prog_bar=True, logger=True)
         self.log('test_mae_loss', test_mae_loss, on_epoch=True, prog_bar=True, logger=True)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=0.001)
+        """
+        Configures the optimizers used during training.
+
+        Returns:
+            torch.optim.Optimizer: The Adam optimizer configured with a learning rate.
+        """
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
