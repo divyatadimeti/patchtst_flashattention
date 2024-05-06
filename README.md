@@ -56,4 +56,75 @@ By default, the above command while run the main driver with the configurations 
 
 
 
-### Results
+## Results
+
+We evaluated the PatchTST model with both vanilla attention and FlashAttention2 using the ETTm1 dataset. Below are the key findings:
+
+### MSE Losses Comparison
+
+Both models were compared based on MSE losses across training, validation, and test datasets:
+
+- Training and validation losses were similar between the models, but PatchTST with FlashAttention2 showed slightly higher losses than vanilla attention.
+- On the ETTh1 dataset, FlashAttention2 showed lower test MSE loss, indicating better performance in smaller datasets.
+
+#### Loss Plots
+![Train MSE Loss](plots/train_mse.png)
+*Train MSE Loss for both models*
+
+![Validation MSE Loss](plots/val_mse.png)
+*Validation MSE Loss for both models*
+
+### Batch Size Impact
+
+We explored the effect of varying batch sizes on model performance. Increasing the batch size significantly decreased total time, especially for FlashAttention2.
+
+#### Batch Size Performance
+| Batch Size | Vanilla Attention Total Time | FlashAttention2 Total Time |
+|------------|------------------------------|----------------------------|
+| 512        | 14.4820 sec                  | 11.0030 sec                |
+| 256        | 14.7140 sec                  | 11.3420 sec                |
+| 128        | 15.7120 sec                  | 12.2490 sec                |
+| 64         | 17.6110 sec                  | 14.9090 sec                |
+| 32         | 24.7230 sec                  | 23.2630 sec                |
+
+![Batch Size Impact](plots/batchsize_plot.png)
+*Total time speedup percentage for varying batch sizes*
+
+### Patch Size Variation
+
+Varying the patch size revealed that smaller patches enhanced the performance of FlashAttention2 more significantly than vanilla attention.
+
+#### Patch Size Performance
+| Patch Size | Vanilla Attention Total Time | FlashAttention2 Total Time |
+|------------|------------------------------|----------------------------|
+| 192        | 8.4250 sec                   | 8.7590 sec                 |
+| 96         | 8.3870 sec                   | 8.7780 sec                 |
+| 48         | 8.2530 sec                   | 8.5971 sec                 |
+| 24         | 9.4820 sec                   | 8.5881 sec                 |
+| 12         | 13.8270 sec                  | 10.1900 sec                |
+
+![Patch Size Impact](plots/patchsize_plot.png)
+*Total time speedup percentage for varying patch sizes*
+
+### Worker Impact on Performance
+
+Increasing the number of workers consistently reduced data loading times, enhancing overall performance, particularly for FlashAttention2.
+
+#### Workers Performance
+| Number of Workers | Vanilla Attention Total Time | FlashAttention2 Total Time |
+|-------------------|------------------------------|----------------------------|
+| 16                | 18.537 sec                   | 13.331 sec                 |
+| 8                 | 15.280 sec                   | 10.782 sec                 |
+| 4                 | 14.013 sec                   | 10.054 sec                 |
+| 2                 | 13.961 sec                   | 10.178 sec                 |
+
+![Number of Workers Impact](plots/numworkers_plot.png)
+*Total time speedup percentage for varying number of workers*
+
+### Pruning Impact
+
+Pruning experiments showed that dynamic pruning with 5 heads per layer resulted in significant improvements in speed and minimal impact on loss.
+
+#### Pruning Results
+![Validation MSE Loss Pruning](plots/val_mse_pruning.png)
+*Validation MSE Loss for models with and without pruning*
