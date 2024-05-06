@@ -1,6 +1,9 @@
 # HPML Project: PatchTST and FlashAttention2 Benchmarking
 
-### Intallation
+### Project Description
+This repository contains an implementation of the PatchTST model using both vanilla attention and FlashAttention2. We provide a detailed comparative analysis assessing performance metrics like dataloading time and computation time, loss, and accuracy. Our results indicate that FlashAttention2, when integrated into the PatchTST architecture, enhances performance over the traditional vanilla attention. Additionally, we investigate various pruning methods to optimize these attention mechanisms efficiently. The experiments with head-specific pruning suggest ways to reduce computational demands while maintaining model effectiveness. This work highlights the advantages of advanced attention mechanisms and pruning techniques in improving efficiency and performance in time series forecasting.
+
+### Installation
 **Clone the project**
 ``` 
 git clone https://github.com/divyatadimeti/patchtst_flashattention.git
