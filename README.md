@@ -78,7 +78,7 @@ We explored the effect of varying batch sizes on model performance. Larger batch
 
 ### Patch Size Variation
 
-Varying the patch size revealed that smaller patches enhanced the performance of FlashAttention2 more significantly than vanilla attention.
+Varying the patch size showed that smaller patches enhanced the performance of FlashAttention2 more significantly than vanilla attention.
 
 #### Patch Size Performance
 | Patch Size | Data Loading Time (Vanilla) | Compute Time (Vanilla) | Total Time (Vanilla) | Data Loading Time (FlashAttention2) | Compute Time (FlashAttention2) | Total Time (FlashAttention2) |
@@ -94,7 +94,7 @@ Varying the patch size revealed that smaller patches enhanced the performance of
 
 ### Worker Impact on Performance
 
-Increasing the number of workers consistently reduced data loading times, enhancing overall performance, particularly for FlashAttention2.
+Increasing the number of workers consistently reduced data loading times, particularly for FlashAttention2.
 
 #### Workers Performance
 | Number of Workers | Data Loading Time (Vanilla) | Compute Time (Vanilla) | Total Time (Vanilla) | Data Loading Time (FlashAttention2) | Compute Time (FlashAttention2) | Total Time (FlashAttention2) |
@@ -105,11 +105,11 @@ Increasing the number of workers consistently reduced data loading times, enhanc
 | 2                 | 0.0046 sec                  | 13.9564 sec            | 13.961 sec           | 0.0085 sec                          | 10.1695 sec                    | 10.178 sec                   |
 
 <img src="plots/numworkers_plot.png" alt="Number of Workers Impact" width="400"/>
-*Decreasing data loading times and increasing worker count significantly boosts performance, with FlashAttention2 showing the greatest benefits.*
+*Decreasing data loading times and increasing worker count boosts performance, with FlashAttention2 showing the greater speedup.*
 
 ### Pruning Impact
 
-Pruning experiments showed that dynamic pruning with 5 heads per layer resulted in significant improvements in speed and minimal impact on loss.
+Pruning experiments showed that dynamic pruning resulted in notable improvements in speed with minimal impact on loss.
 
 #### Pruning Results
 <img src="plots/val_mse_pruning.png" alt="Validation MSE Loss Pruning" width="400"/>
