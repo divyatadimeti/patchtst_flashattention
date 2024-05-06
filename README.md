@@ -35,7 +35,7 @@ Provides utility functions for pruning attention heads. Supports both static and
 Script to run experiments with the PatchTST model. Supports testing different configurations with patch sizes, batch sizes, and number of workers through command-line arguments. Utilizes configurations loaded from config.yaml file and integrates experiments defined in `experiment_utils.py`. Ensures only one type of experiment is conducted at a time.
 
 
-
+________________________________________________________________________________________________________________________________________________________________________________________________
 
 
 ### Installation
