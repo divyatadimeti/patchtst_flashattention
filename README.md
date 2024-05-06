@@ -133,3 +133,17 @@ Pruning experiments showed that dynamic pruning with 5 heads per layer resulted 
 
 <img src="plots/val_mse_pruning.png" alt="Validation MSE Loss Pruning" width="400"/>
 *Validation MSE Loss for models with and without pruning*
+
+
+## Observations
+
+### Performance Optimization
+- **FlashAttention2 Efficiency**: FlashAttention2 consistently outperforms vanilla attention in handling high computational loads. Notably, at a batch size of 512, FlashAttention2 shows a 31.6% total time speedup compared to vanilla attention, excelling in large-scale data processing. Smaller patch sizes further amplify this effect, with up to a 35.7% speedup observed for a patch size of 12.
+- **Optimization Limits**: Larger patch sizes (192 and 96) combined with large batch sizes introduce performance bottlenecks, likely due to memory bandwidth and computational overhead, highlighting the need for optimal configuration to maximize efficiency.
+
+### Pruning Effects
+- **Static Pruning**: Initial static pruning strategies, which included conservative and random pruning, did not significantly enhance computational speed but maintained model accuracy, suggesting a robust baseline for further pruning exploration.
+- **Dynamic Pruning**: Dynamic pruning strategies, which involve iteratively removing less significant weights, improved performance efficiency with a 5.7% speedup. This points to the potential of more advanced pruning techniques to achieve even greater efficiency without sacrificing accuracy.
+
+These insights demonstrate the potential of optimized attention mechanisms and pruning strategies to significantly enhance the efficiency and performance of time series forecasting models like PatchTST.
+
