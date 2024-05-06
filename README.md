@@ -2,6 +2,7 @@
 
 ### Project Description
 This repository contains an implementation of the PatchTST model using both vanilla attention and FlashAttention2. We provide a detailed comparative analysis assessing performance metrics like dataloading time and computation time, loss, and accuracy. Our results indicate that FlashAttention2, when integrated into the PatchTST architecture, enhances performance over the traditional vanilla attention. Additionally, we investigate various pruning methods to optimize these attention mechanisms efficiently. The experiments with head-specific pruning suggest ways to reduce computational demands while maintaining model effectiveness. This work highlights the advantages of advanced attention mechanisms and pruning techniques in improving efficiency and performance in time series forecasting.
+________________________________________________________________________________________________________________________________________________________________________________________________
 
 ### Outline of Repository
 
@@ -65,6 +66,7 @@ We use the official code from the FlashAttention repository to run PatchTST with
 ```
 pip install -U flash-attn --no-build-isolation
 ```
+________________________________________________________________________________________________________________________________________________________________________________________________
 
 ### Download the Datasets
 **Download the ETDataset and the Traffic dataset**
@@ -74,6 +76,8 @@ wget -O data/ETTh1.csv https://github.com/zhouhaoyi/ETDataset/raw/main/ETT-small
 wget -O data/ETTm1.csv https://github.com/zhouhaoyi/ETDataset/raw/main/ETT-small/ETTm1.csv
 ```
 The Traffic dataset can be installed by creating an account with Caltrans PeMS and downloading the data from the website: https://dot.ca.gov/programs/traffic-operations/mpr/pems-source.
+
+________________________________________________________________________________________________________________________________________________________________________________________________
 
 ### Running the Code
 **Config file**
@@ -86,6 +90,7 @@ python run.py
 ```
 By default, the above command while run the main driver with the configurations in `config.yaml`. To run experiments using mini hyperparameter sweeps as outlined in our paper with patch size, batch size, datasets and number of workers, utilize the appropriate flags: `--patch_size_exp`, `--batch_size_exp`, `--num_workers_exp`.
 
+________________________________________________________________________________________________________________________________________________________________________________________________
 
 
 ## Results
@@ -152,6 +157,7 @@ Pruning experiments showed that dynamic pruning resulted in notable improvements
 <img src="plots/val_mse_pruning.png" alt="Validation MSE Loss Pruning" width="400"/>
 *Validation MSE Loss for models with and without pruning*
 
+________________________________________________________________________________________________________________________________________________________________________________________________
 
 ## Observations
 
