@@ -68,7 +68,7 @@ Both models were compared based on MSE losses across training, validation, and t
 - On the ETTh1 dataset, FlashAttention2 showed lower test MSE loss, indicating better performance in smaller datasets.
 
 #### Loss Plots
-![Train MSE Loss](plots/train_mse.png)
+<img src="plots/train_mse.png" alt="Train MSE Loss" width="400"/>
 *Train MSE Loss for both models*
 
 ![Validation MSE Loss](plots/val_mse.png)
